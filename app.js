@@ -4,7 +4,8 @@ const authRoutes = require('./routes/authRoutes');
 const passwordRoutes = require('./routes/passwordRoutes');
 const cookieParser = require('cookie-parser');
 const { requireAuth, checkUser } = require('./middleware/authMiddleware');
-
+const dotenv = require('dotenv');
+dotenv.config();
 const app = express();
 
 // middleware

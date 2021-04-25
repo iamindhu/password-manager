@@ -7,7 +7,7 @@ async function deleteuser(){
         location.assign('/login');
       }
       catch (err) {
-        console.log(err);
+        console.log(err); 
       }
 }
 

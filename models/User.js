@@ -22,6 +22,9 @@ const addPasswordSchema = new mongoose.Schema({
   password_a:{
       type: String,
       required: [true, 'please enter a password']
+  },
+  password_strength:{
+    type: Number,
   }
 })
 
@@ -44,7 +47,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: true, 
     minlength: 6
   },
   mobile: {
@@ -63,6 +66,13 @@ const userSchema = new mongoose.Schema({
     type: Number,
   },
   history : [historySchema],
+  resetlink:{
+    type:String,
+    default:"",
+  },
+  total_strength:{
+    type:Number,
+  }
 });
 
 

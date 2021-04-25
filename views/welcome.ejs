@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
-<title>W3.CSS Template</title>
+<title>Dashboard|Password Manager</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style_common.css">
 <link rel="stylesheet" href="css/welcome.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<script type="text/javascript" src="javascript/js_common.js"></script> 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
@@ -32,13 +33,13 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <!-- Header -->
   <header class="container" style="padding-top:22px">
-    <h5><b><i class="fa fa-dashboard"></i> My Dashboard</b></h5>
+    <h3><b><i class="fa fa-users fa-fw"></i> My Dashboard</b></h5>
   </header>
 
   <div class="row-padding margin-bottom">
     <div class="quarter">
       <div class="container red padding-16">
-        <div class="left"><i class="fa fa-comment xxxlarge"></i></div>
+        <div class="left"><i class="fa fa-reddit-alien xxxlarge"></i></div>
         <div class="right">
           <h3><%= userobj.numberOfVisits %></h3>
         </div>
@@ -48,7 +49,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
     <div class="quarter">
       <div class="container blue padding-16">
-        <div class="left"><i class="fa fa-eye xxxlarge"></i></div>
+        <div class="left"><i class="fa fa-key xxxlarge"></i></div>
         <div class="right">
           <h3><%= userobj.addpassword.length %></h3>
         </div>
@@ -58,9 +59,9 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
     <div class="quarter">
       <div class="container teal padding-16">
-        <div class="left"><i class="fa fa-share-alt xxxlarge"></i></div>
+        <div class="left"><i class="fa fa-database xxxlarge"></i></div>
         <div class="right">
-          <h3>userobj.</h3>
+          <h3><%= count %></h3>
         </div>
         <div class="clear"></div>
         <h4>Accounts</h4>
@@ -68,23 +69,16 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </div>
     <div class="quarter">
       <div class="container orange text-white padding-16">
-        <div class="left"><i class="fa fa-users xxxlarge"></i></div>
+        <div class="left"><i class="fa fa-calculator xxxlarge"></i></div>
         <div class="right">
-          <h3>50</h3>
+          <h3><%= userobj.total_strength %></h3>
         </div>
         <div class="clear"></div>
         <h4>Security Socre</h4>
       </div>
     </div>
   </div>
-  <div id="prompt-form-container">
-    <form id="prompt-form">
-    <div id="prompt-message"></div>
-    <input type="password" name = "text">
-    <input type="submit" value="Ok">
-    <input type="button" name="cancel" value="Cancel">
-    </form>
-</div>
+
   <div class="panel">
     <div class="row-padding" style="margin:0 -16px">
       <div class="twothird">

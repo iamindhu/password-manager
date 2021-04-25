@@ -1,7 +1,8 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
-
+const bcrypt = require('bcrypt');
+const nodemailer=require('nodemailer');
 
 // handle errors
 const handleErrors = (err) => {
@@ -28,7 +29,6 @@ const handleErrors = (err) => {
   if (err.message.includes('user validation failed')) {
 
     Object.values(err.errors).forEach(({ properties }) => {
- 
       errors[properties.path] = properties.message;
     });
   }
@@ -39,7 +39,7 @@ const handleErrors = (err) => {
 // create json web token
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({ id }, 'net ninja secret', {
+  return jwt.sign({ id }, process.env.jwt_secret, {
     expiresIn: maxAge
   });
 };
@@ -52,7 +52,7 @@ module.exports.signup_get = (req, res) => {
 module.exports.login_get = (req, res) => {
   const token = req.cookies.jwt; 
     if (token) {
-      jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+      jwt.verify(token, process.env.jwt_secret, async (err, decodedToken) => {
         if (err) {
           console.log(err.message);
           res.redirect('/login');
@@ -96,7 +96,7 @@ module.exports.login_post = async (req, res) => {
 
 module.exports.logout_get = (req, res) => {
   const token = req.cookies.jwt; 
-  jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+  jwt.verify(token, process.env.jwt_secret, async (err, decodedToken) => {
       let user = await User.findById(decodedToken.id); 
       const event = 'User Logged Out';
       if(user)
@@ -110,14 +110,14 @@ module.exports.logout_get = (req, res) => {
 module.exports.welcome_get = (req, res) =>{
   const token = req.cookies.jwt; 
     if (token) {
-      jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+      jwt.verify(token, process.env.jwt_secret, async (err, decodedToken) => {
         if (err) {
           console.log(err.message);
           res.redirect('/login');
         } else {
-          //console.log(User.collection.estimatedDocumentCount({}));
           let user = await User.findById(decodedToken.id); 
-          res.render('welcome',{userobj:user, moment:moment});
+          let count = await User.estimatedDocumentCount();
+          res.render('welcome',{userobj:user, moment:moment, count:count});
         }
       });   
     } else {
@@ -128,7 +128,7 @@ module.exports.welcome_get = (req, res) =>{
 module.exports.deleteuser_get = (req, res) =>{
   const token = req.cookies.jwt;
   if(token){
-    jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+    jwt.verify(token, process.env.jwt_secret, async (err, decodedToken) => {
       res.redirect('/logout');
       let user = await User.findById(decodedToken.id);
       user.remove({_id:decodedToken.id});
@@ -139,7 +139,7 @@ module.exports.deleteuser_get = (req, res) =>{
 module.exports.accounthistory_get = (req, res) =>{
   const token = req.cookies.jwt; 
     if (token) {
-      jwt.verify(token, 'net ninja secret', async (err, decodedToken) => {
+      jwt.verify(token, process.env.jwt_secret, async (err, decodedToken) => {
         if (err) {
           console.log(err.message);
           res.redirect('/login');
@@ -151,4 +151,103 @@ module.exports.accounthistory_get = (req, res) =>{
     } else {
       res.redirect('/login');
     }
+}
+
+module.exports.forgotpassword_get=(req,res)=>{
+  res.render("forgotpassword");
+}
+module.exports.forgotpassword_post= async (req,res)=>{
+  const {email} = req.body;
+   const user=await User.findOne({email:email});
+     if(user!=null){
+      const token=jwt.sign({_id:user._id},process.env.RESET_PASSWORD_KEY,{expiresIn: '10m'});
+        var transporter= nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: 'hackthis404@gmail.com',
+            pass: 'hackifucan404'
+          }
+        });
+          
+        var mailOptions={
+          from: 'hackthis404@gmail.com',
+          to: email,
+          subject : "Password reset",
+          html :`<h2> Please click on given link to reset your password</h2>
+                  <a href="${process.env.CLIENT_URL}/resetpassword/${token}">Click here</a>`
+        };
+
+        user.updateOne({resetlink:token},function(err,success){
+          if(err){
+            return res.status(404).json({message :"reset password link error"});
+          }
+          else{
+            transporter.sendMail(mailOptions,function(err,info){
+              if(err){
+                res.status(200).json({ message: "Mail not sent" });  
+                console.log(err);
+              }
+              else{
+                res.status(200).json({ message : "Mail Sent, You can close this page now" }); 
+                const event = 'Reset Password Mail Request sent';
+                user.history.push({event});
+                user.save();
+              }
+            });
+          }
+        });
+     }
+     else{
+      res.status(404).json({ message: "That Email is not reg" });  
+
+     }
+}
+
+module.exports.resetpassword_get= async(req,res)=>{
+  var resettoken=req.params.token;
+  if(resettoken){
+    jwt.verify(resettoken,process.env.RESET_PASSWORD_KEY, async function(err,decoded_token){
+      if(err){
+        return res.status(401).json({error:"Incorrect token ot it is expired"});
+      }
+      const user=await User.findOne({resetlink:resettoken});
+      if(user){
+        res.render('resetpassword',{resetlink:resettoken});
+      }
+      else{
+        return res.status(401).json({error:"user with this token doesn't exist"});
+      }
+    });
+  }
+  else{
+    return res.status(401).json({error:"authentication error"});
+  }
+}
+
+module.exports.resetpassword_post= async (req,res)=>{
+  var {password,resetlink}=req.body;
+  const user=await User.findOne({resetlink:resetlink});
+  const salt = await bcrypt.genSalt();
+  password = await bcrypt.hash(password, salt);
+  user.updateOne({password:password},function(err,success){
+   if(err){
+    res.status(200).json({ status: false });  
+   }
+   else{
+    const event = 'Master Password Reset Successful';
+      user.history.push({event});
+      user.save();
+    res.status(200).json({ status: true });  
+   }
+   
+  });
+
+  user.updateOne({resetlink:null}, function(err,success){
+    if(err){
+    }
+    else{
+      //console.log("Success");
+    }
+  });
+
 }
