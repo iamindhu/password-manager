@@ -6,6 +6,8 @@ confirm_button.addEventListener("click",async(e)=>{
   location.assign('/settings');
 });
 function showform(){
+  document.getElementById("prompt_input").type = "password";
+
   showPrompt("Enter Master Password ", function(value) {
     let password = value;
     check_password(password);
