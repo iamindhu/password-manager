@@ -30,7 +30,7 @@ const credError = document.getElementById('cred_error')
     const password = sform.password.value;
     const mobile = sform.mobile.value;
     const username = sform.username.value;
-	const repassword = sform.repassword.value;
+	  const repassword = sform.repassword.value;
 
     var regularExpression = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 	var phone_pattern = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/;
@@ -80,7 +80,7 @@ const credError = document.getElementById('cred_error')
       });
       const data = await res.json();
       if (data.message) {
-        credError.textContent = data.message;
+        credError.textContent =data.message.cred;
       }
       if (data.user) {
         location.assign('/welcome');

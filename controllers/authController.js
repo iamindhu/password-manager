@@ -1,16 +1,17 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
+const moment=require('moment');
 const bcrypt = require('bcrypt');
 const nodemailer=require('nodemailer');
 
 // handle errors
 const handleErrors = (err) => {
-  console.log(err.message, err.code);
+  //console.log(err.message, err.code);
   let errors = { email: '', password: '', mobile: '', username:'', cred:''};
 
   // duplicate error
   if (err.code === 11000) {
+    console.log(err.message)
     errors.cred = 'These credentials already exist';
     return errors;
   }
@@ -29,20 +30,22 @@ const handleErrors = (err) => {
   if (err.message.includes('user validation failed')) {
 
     Object.values(err.errors).forEach(({ properties }) => {
+ 
       errors[properties.path] = properties.message;
     });
   }
 
   return errors;
 }
-
 // create json web token
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.jwt_secret, {
+  return jwt.sign({ id },  process.env.jwt_secret, {
     expiresIn: maxAge
   });
 };
+
+
 
 // controller actions
 module.exports.signup_get = (req, res) => {
@@ -75,8 +78,8 @@ module.exports.signup_post = async (req, res) => {
     res.status(201).json({ user: user._id });
   }
   catch(err) {
-    const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    const message = handleErrors(err);
+    res.status(400).json({ message });
   }
  
 }

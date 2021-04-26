@@ -3,13 +3,9 @@ var confirm_button=document.getElementById("confirm");
 var n_username,n_email,n_number;
 
 confirm_button.addEventListener("click",async(e)=>{
-  document.getElementById("button-username").disabled=true;
-  document.getElementById("button-email").disabled=true;
-  document.getElementById("button-number").disabled=true;
   location.assign('/settings');
 });
 function showform(){
-  error.innerHTML="";
   showPrompt("Enter Master Password ", function(value) {
     let password = value;
     check_password(password);
@@ -26,6 +22,7 @@ async function check_password(password){
     const data = await res.json();
  
     if( data.status){
+      error.innerHTML="click lock details to apply the changes";
       document.getElementById("button-username").disabled=false;
       document.getElementById("button-email").disabled=false;
       document.getElementById("button-number").disabled=false;
@@ -64,7 +61,7 @@ function change(id){
     
   }
   if(id=="button-email"){
-      document.getElementById("prompt_input").type = "text";
+      document.getElementById("prompt_input").type = "email";
       showPrompt("Enter new email", function(value){
         if(!email_regularExpression.test(value)){
           error.innerHTML= 'Please enter a valid e-mail address';
@@ -77,7 +74,7 @@ function change(id){
     
   }
   if(id=="button-number"){
-    document.getElementById("prompt_input").type = "text";
+    document.getElementById("prompt_input").type = "tel";
       showPrompt("Enter new number", function(value){
         if(!phone_pattern.test(value)){
           error.innerHTML= 'It is not valid mobile number';
@@ -86,13 +83,6 @@ function change(id){
         error.innerHTML="";
         n_number=value;
         update(null, null, n_number);
-      //   $.ajax({
-      //     type="POST",
-      //     url: "/update",
-      //     data: data,
-      //     success: function () { },
-      //     error: function () { }
-      // });
       });
   }
   
