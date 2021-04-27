@@ -76,7 +76,8 @@ const credError = document.getElementById('cred_error')
       const res = await fetch('/signup', { 
         method: 'POST', 
         body: JSON.stringify({ email, password, mobile, username }),
-        headers: {'Content-Type': 'application/json'}
+        headers: {
+          'Content-Type': 'application/json'}
       });
       const data = await res.json();
       if (data.message) {
