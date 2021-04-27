@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const moment=require('moment');
 const bcrypt = require('bcrypt');
 const nodemailer=require('nodemailer');
+const sendgrid = require('@sendgrid/mail');
 
 // handle errors
 const handleErrors = (err) => {
@@ -165,13 +166,15 @@ module.exports.forgotpassword_post= async (req,res)=>{
    const user=await User.findOne({email:email});
      if(user!=null){
       const token=jwt.sign({_id:user._id},process.env.RESET_PASSWORD_KEY,{expiresIn: '10m'});
-        var transporter= nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: 'hackthis404@gmail.com',
-            pass: 'hackifucan404'
-          }
-        });
+        // var transporter= nodemailer.createTransport({
+        //   service: 'gmail',
+        //   auth: {
+        //     user: 'hackthis404@gmail.com',
+        //     pass: 'hackifucan404'
+        //   }
+        // });
+
+        sendgrid.setApiKey(process.env.SEND_GRID);
           
         var mailOptions={
           from: 'hackthis404@gmail.com',
@@ -186,16 +189,25 @@ module.exports.forgotpassword_post= async (req,res)=>{
             return res.status(404).json({message :"reset password link error"});
           }
           else{
-            transporter.sendMail(mailOptions,function(err,info){
-              if(err){
-                res.status(200).json({ message: "Mail not sent" });  
-                console.log(err);
-              }
-              else{
-                res.status(200).json({ message : "Mail Sent, You can close this page now" }); 
-                const event = 'Reset Password Mail Request sent';
-                user.history.push({event});
-                user.save();
+            // transporter.sendMail(mailOptions,function(err,info){
+            //   if(err){
+            //     res.status(200).json({ message: "Mail not sent" });  
+            //     console.log(err);
+            //   }
+            //   else{
+            //     res.status(200).json({ message : "Mail Sent, You can close this page now" }); 
+            //     const event = 'Reset Password Mail Request sent';
+            //     user.history.push({event});
+            //     user.save();
+            //   }
+            // });
+            sendgrid.send(mailOptions).then(() => {
+              res.status(200).json({ message: "Mail sent"});
+             }, error => {
+              console.error(error);
+              res.status(200).json({ message: "Mail not sent" }); 
+              if (error.response) {
+                console.error(error.response.body)
               }
             });
           }
